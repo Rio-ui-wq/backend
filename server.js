@@ -18,6 +18,8 @@ const recordSchema = new mongoose.Schema({
   bookTitle: String,
   progress: Number,
   rating: Number,
+  userId: String,
+  userDisplayName: String,
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -34,7 +36,22 @@ app.post("/records", async (req, res) => {
   }
 });
 
-// 本ごとの記録を取得
+
+
+// 自分の記録だけ取得
+app.get("/records/:bookId/mine", async (req, res) => {
+  try {
+    const records = await Record.find({ 
+      bookId: req.params.bookId,
+      userId: req.query.userId
+    }).sort({ progress: 1 });
+    res.json(records);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 全員の記録を取得
 app.get("/records/:bookId", async (req, res) => {
   try {
     const records = await Record.find({ bookId: req.params.bookId }).sort({ progress: 1 });
@@ -43,6 +60,9 @@ app.get("/records/:bookId", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+
 
 app.listen(process.env.PORT, () => {
   console.log(`サーバー起動中：http://localhost:${process.env.PORT}`);
