@@ -68,6 +68,24 @@ app.get("/records/:bookId/dropped", async (req, res) => {
   }
 });
 
+// 離脱率統計取得
+app.get("/records/:bookId/stats", async (req, res) => {
+  try {
+    const total = await Record.countDocuments({ 
+      bookId: req.params.bookId,
+      $or: [{ dropped: true }, { finished: true }]
+    });
+    const dropped = await Record.countDocuments({ 
+      bookId: req.params.bookId,
+      dropped: true 
+    });
+    const dropRate = total > 0 ? Math.round((dropped / total) * 100) : 0;
+    res.json({ total, dropped, dropRate });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 全員の記録を取得
 app.get("/records/:bookId", async (req, res) => {
   try {
