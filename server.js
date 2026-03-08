@@ -96,6 +96,42 @@ app.get("/records/:bookId", async (req, res) => {
   }
 });
 
+// 本棚スキーマ
+const bookshelfSchema = new mongoose.Schema({
+  userId: String,
+  bookId: String,
+  bookTitle: String,
+  bookAuthor: String,
+  bookThumbnail: String,
+  addedAt: { type: Date, default: Date.now }
+});
+
+const Bookshelf = mongoose.model("Bookshelf", bookshelfSchema);
+
+// 本棚に追加
+app.post("/bookshelf", async (req, res) => {
+  try {
+    const { userId, bookId } = req.body;
+    const existing = await Bookshelf.findOne({ userId, bookId });
+    if (existing) return res.json(existing);
+    const item = new Bookshelf(req.body);
+    await item.save();
+    res.json(item);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 本棚を取得
+app.get("/bookshelf/:userId", async (req, res) => {
+  try {
+    const items = await Bookshelf.find({ userId: req.params.userId }).sort({ addedAt: -1 });
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(process.env.PORT, () => {
   console.log(`サーバー起動中：http://localhost:${process.env.PORT}`);
 });
