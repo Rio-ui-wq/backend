@@ -20,6 +20,8 @@ const recordSchema = new mongoose.Schema({
   rating: Number,
   userId: String,
   userDisplayName: String,
+  dropped: { type: Boolean, default: false },
+  finished: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -40,8 +42,6 @@ app.post("/records", async (req, res) => {
   }
 });
 
-
-
 // 自分の記録だけ取得
 app.get("/records/:bookId/mine", async (req, res) => {
   try {
@@ -49,6 +49,19 @@ app.get("/records/:bookId/mine", async (req, res) => {
       bookId: req.params.bookId,
       userId: req.query.userId
     }).sort({ progress: 1 });
+    res.json(records);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 離脱データ取得
+app.get("/records/:bookId/dropped", async (req, res) => {
+  try {
+    const records = await Record.find({ 
+      bookId: req.params.bookId,
+      dropped: true
+    });
     res.json(records);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -64,9 +77,6 @@ app.get("/records/:bookId", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
-
 
 app.listen(process.env.PORT, () => {
   console.log(`サーバー起動中：http://localhost:${process.env.PORT}`);
