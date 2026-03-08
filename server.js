@@ -28,8 +28,12 @@ const Record = mongoose.model("Record", recordSchema);
 // 記録を保存
 app.post("/records", async (req, res) => {
   try {
-    const record = new Record(req.body);
-    await record.save();
+    const { userId, bookId, progress } = req.body;
+    const record = await Record.findOneAndUpdate(
+      { userId, bookId, progress },
+      req.body,
+      { upsert: true, new: true }
+    );
     res.json(record);
   } catch (err) {
     res.status(500).json({ error: err.message });
