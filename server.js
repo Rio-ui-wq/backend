@@ -150,3 +150,16 @@ app.get("/bookshelf/:userId", async (req, res) => {
 app.listen(process.env.PORT, () => {
   console.log(`サーバー起動中：http://localhost:${process.env.PORT}`);
 });
+
+// 本棚から削除
+app.delete("/bookshelf/:userId/:bookId", async (req, res) => {
+  try {
+    await Bookshelf.deleteOne({ 
+      userId: req.params.userId, 
+      bookId: req.params.bookId 
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
