@@ -122,6 +122,21 @@ app.post("/bookshelf", async (req, res) => {
   }
 });
 
+// 離脱・読了フラグリセット
+app.delete("/records/:bookId/status", async (req, res) => {
+  try {
+    const { userId } = req.query;
+    await Record.deleteMany({ 
+      bookId: req.params.bookId,
+      userId,
+      $or: [{ dropped: true }, { finished: true }]
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 本棚を取得
 app.get("/bookshelf/:userId", async (req, res) => {
   try {
